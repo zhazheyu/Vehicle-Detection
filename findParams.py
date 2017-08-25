@@ -39,17 +39,16 @@ from utils import *
 ### Step 1: Train svc
 # Parameters tuning.
 # colorspace = 'YCrCb'
-colorspaces = ['YUV', 'YCrCb'] 
+colorspaces = ['HSV', 'YUV', 'YCrCb'] 
 # orient = 9
 orients = [13]
 pix_per_cell = 8
 cell_per_block = 2
 # spatial_size = (32, 32)
-spatial_sizes = [(32, 32)]
-hist_bins = 32
+spatial_sizes = [(16, 16)]
+hist_bins = 64
 hog_channels = ['ALL']
-# hog_channel = 0
-sample_size = 8000
+sample_size = None
 
 for spatial_size in spatial_sizes:
     for colorspace in colorspaces:

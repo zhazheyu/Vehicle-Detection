@@ -81,6 +81,7 @@ Here is an example using the `YUV` color space and HOG parameters of `orientatio
 I tried various combinations of parameters and 
 
 | colorspace | orientations  | hog_channel | spatial_size | Extract Time | Test_Accuracy | Features |
+| ---------- | -----------  | ------ | ------ | ----- | ------ | ------- |
 | YCrCb |  9  | ALL | None | 520.98s | 0.9878 | 5292 |
 | YCrCb |  11 | ALL | None |  604.28 | 0.9906 | 6468 |
 | YCrCb |  13 | ALL | None |  695.82 | 0.9894 | 7644 |
@@ -133,13 +134,25 @@ I tried various combinations of parameters and
 | YCrCb |  13 | ALL | (32, 32) | 77.27 | 0.9928 | 10716 |
 | YCrCb |  13 | 0 | (32, 32) | 331.2 | 0.9812 | 5620 |
 
-From the above parameters exploration, it is found that colorspace YUV, orientenation = 13, All channel for hog_feature extraction, and (32, 32) spatial size got highest accuracy -- test accuracy 0.9959. 
+
+
+
+
+From the above parameters exploration, it is found that colorspace YUV, orientenation = 13, All channel for hog_feature extraction, and (32, 32) spatial size got highest accuracy -- test accuracy 0.9959.
+
+But based on view feedback, I picked the some combination of parameters, it got the following results.
+
+| colorspace | oriens | hog_channel | spatial_size | histogram bins | extract time | test accuracy | features |
+| ----- | ---- | ---- | -------- | ---- | ------ | ------ | ---- |
+| HSV   | 13   | ALL  | (16, 16) | 64   | 152.83 | 0.9918 | 8604 |
+| YUV   | 13   | ALL  | (16, 16) | 64   | 94.78  | 0.9944 | 8604 |
+| YCrCb | 13   | ALL  | (16, 16) | 64   | 95.57  | 0.9955 | 8604 |
 
 All trained SVC are saved in folder -- trainedSVC.   findParameters.py was used to do this parameters exploration.
 
 ####3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
 
-I trained a linear SVM with the default classifier parameters and using HOG features and spatial intensity with size (32, 32) (I did not use channel intensity histogram features) and was able to achieve a test accuracy of 99.59%.
+I trained a linear SVM with the default classifier parameters and using HOG features and spatial intensity with size (16, 16) and 64 histogram bins and was able to achieve a test accuracy of 99.55%.
 
 ###Sliding Window Search
 
@@ -192,12 +205,12 @@ Ultimately I searched on two scales using YUV 3-channel HOG features plus spatia
 ### Video Implementation
 
 ####1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result](./project_video_outputYCrCb13ALL16T6.mp4)
 
 
 ####2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
 
-I recorded the positions of positive detections in each frame of the video.  From the positive detections I created a heatmap and then thresholded that map to identify vehicle positions.  I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap.  I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected.  
+I recorded the positions of positive detections in each frame of the video.  From the positive detections I created a heatmap and then thresholded that map to identify vehicle positions.  I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap.  I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected. 
 
 Here's an example result showing the heatmap from a series of frames of video, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video:
 
@@ -206,16 +219,23 @@ Here's an example result showing the heatmap from a series of frames of video, t
 ![alt text][image25]
 ![alt text][image30]
 
+
+Moreover, since video is consisted of continuous frames, so it is safe to assume that the vehicle has close positions in continuous frames.  Because vehicle cannot appear/disappear in picture suddenly.  The video is recorded in 25FPS. If we assume the car travels with speed of 100km/h, it passes about 28 meters per second or 1.12 meters per frame.  Moreover, our vehicle is moving in the same direction, so it should be less than this value.  To utilize this feature, we can smooth over the continuous frames to filter out some false positve and gthe bounding boxes much smoother. 
+
+So in my pipeline, I choose to smooth over 5 frames, meaning add these boxes together and then get heatmap, then label them and locate vehicle.  FYI, for the very beginning, if the frames are less than 5, then the threshold for heat map will be reduced accordingly.  Please check the implementation process_image function in main.py 
+
 ---
 
 ###Discussion
 
 ####1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-From the output video, it can be found that there are still have some false positives. In my opinion, there are two ways to make it more robust.
+From the output video, it can be found that there are still have some false positives and false negative. In my opinion, there are two ways to make it more robust.
 
-1. Needs more training data.  From output_video, it can be found that false positives are mainly related with area with tree shadow.  By increasing more training data related with this category could make classifier more robust.
-2. Could smooth over contiguous frames.  It is based on assumption, that one vehicle won't appear/disappear suddenly in contiguous frames.  Thus, we can filter false positive if one detected car location show in one frame, but disappear in next frame.
+1. Needs more training data.  From output_video, it can be found that false negative are mainly related with white road surface.  I think that because the training data is not general enough, or not suit for this project video.  The reason is that the trained classifier can reach high test accuracy, around 99%, but it will mis-predict in video frames with sliding window.   
+2. Choose better threshold.  From output video, it can be found that the outbounding box sometimes are larger than vehicle. It means that the threshold is set as low.
 
-The training data is not general enough, or not suit for this project video.  The reason is that the trained classifier can reach high test accuracy, around 99%, but it will mis-predict in video frames with sliding window.   
+
+
+
 

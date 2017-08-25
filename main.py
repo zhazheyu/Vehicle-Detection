@@ -12,9 +12,12 @@ from utils import *
 
 # filename = 'YCrCb13ALL(16, 16).pickle'
 # filename = 'YUV13ALL(24, 24).pickle'
-filename = 'YUV13ALL(24, 24).pickle'
+# filename = 'YUV13ALL(24, 24).pickle'
 # filename = 'svc.pickle'
 # filename = 'YUV13ALL(32, 32)32.pickle'
+
+filename = 'YCrCb13ALL(16, 16).pickle'
+# filename = 'YUV13ALL(16, 16).pickle'
 
 ### Step 1: Train svc
 # Parameters tuning.
@@ -57,21 +60,15 @@ ystop = 720
 
 # scales = [1.5, 2.5, 3.5, 4.5]
 # scales = [1, 1.5, 2, 2.5, 3, 3.5, 4]
-scales = [1.5, 2.5, 3.5]
+scales = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75 , 3, 3.25, 3.5, 3.75, 4]
+
+# scales = [1.5, 2.5, 3.5]
 out_img, bbox_list = find_cars_with_scales(img, ystart, ystop, scales, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, hog_channel=hog_channel)
 
 imBGRshow(out_img)
 
-# # Test all test images
-# test_images = glob.glob('test_images/*.jpg')
-# for test_image in test_images:
-    # img = cv2.imread(test_image)
-    # # out_img, bbox_list = find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, hog_channel=hog_channel)
-    # out_img, bbox_list = find_cars_with_scales(img, ystart, ystop, scales, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, hog_channel=hog_channel)
-    # imBGRshow(out_img)
-
 ## Step 3: Get heat image
-threshold = 4
+threshold = 6
 heatmap = getHeatmap(img, bbox_list, threshold = threshold)
 
 from scipy.ndimage.measurements import label
@@ -88,16 +85,46 @@ plt.title('Heat Map')
 plt.show()
 
 
+# # Test all test images
+# test_images = glob.glob('test_images/*.jpg')
+# for test_image in test_images:
+    # img = cv2.imread(test_image)
+    # # out_img, bbox_list = find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, hog_channel=hog_channel)
+    # out_img, bbox_list = find_cars_with_scales(img, ystart, ystop, scales, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, hog_channel=hog_channel)
+    # imBGRshow(out_img)
+    # heatmap = getHeatmap(img, bbox_list, threshold = threshold)
+    # labels = label(heatmap)
+    # draw_img = draw_labeled_bboxes(np.copy(img), labels)
+    
+    # fig = plt.figure()
+    # plt.subplot(121)
+    # plt.imshow(cv2.cvtColor(draw_img, cv2.COLOR_BGR2RGB))
+    # plt.title('Car Positions')
+    # plt.subplot(122)
+    # plt.imshow(heatmap, cmap='hot')
+    # plt.title('Heat Map')
+    # plt.show()
+
+
 ### Step 4: define process_image function
 from scipy.ndimage.measurements import label
+from collections import deque
+n_frames = 5
+history = deque(maxlen=n_frames) # where n_frames is number of history frames you want to store
+
 def process_image(img):
     ystart = 380
-    ystop = 720
-    # scales = [1, 1.5, 2, 2.5, 3, 3.5, 4]
+    ystop = 720   
 
     out_img, bbox_list = find_cars_with_scales(img, ystart, ystop, scales, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, hog_channel=hog_channel)
     
-    heatmap = getHeatmap(img, bbox_list, threshold = threshold)
+    history.append(bbox_list)
+    history_len = len(history)
+    sumbbox_list = []
+    for index in range(history_len):
+        sumbbox_list = sumbbox_list + history[index]
+    
+    heatmap = getHeatmap(img, sumbbox_list, threshold = threshold * history_len)
     labels = label(heatmap)
     draw_img = draw_labeled_bboxes(np.copy(img), labels)
     return draw_img
@@ -106,7 +133,7 @@ def process_image(img):
 ### Step 5: Generate video output
 from moviepy.editor import VideoFileClip
 
-output_filename = 'project_video_output.mp4'
+output_filename = 'project_video_outputYCrCb13ALL16T6.mp4'
 # output_filename = 'test_video_output.mp4'
 # To speed up the testing process you may want to try your pipeline on a shorter subclip of the video
 #clip1 = VideoFileClip("test_videos/solidWhiteRight.mp4").subclip(0,2)

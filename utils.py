@@ -118,8 +118,13 @@ def combineFeatures(hog_features, img, spatial_size, hist_bins):
     if spatial_size == None:
         test_features = np.hstack((hog_features)).ravel()
     else:
-        spatial_features = bin_spatial(img, size=spatial_size)
-        test_features = np.hstack((spatial_features, hog_features)).ravel()
+        if hist_bins == None:
+            spatial_features = bin_spatial(img, size=spatial_size)
+            test_features = np.hstack((spatial_features, hog_features)).ravel()
+        else:
+            spatial_features = bin_spatial(img, size=spatial_size)
+            hist_features = color_hist(img, nbins=hist_bins)
+            test_features = np.hstack((spatial_features, hist_features, hog_features)).ravel()
     
     return test_features
 
@@ -167,7 +172,10 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, ce
     draw_img = np.copy(img)
     # img = img.astype(np.float32)/255
     
-    img_tosearch = img[ystart:ystop,:,:]
+    ##### Only used for this video, to reduce the searching area.
+    xstart = 640
+    
+    img_tosearch = img[ystart:ystop,xstart:,:]
     ctrans_tosearch = convert_color(img_tosearch, cspace=cspace)
     if scale != 1:
         imshape = ctrans_tosearch.shape
@@ -233,7 +241,7 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, ce
                 ytop_draw = np.int(ytop*scale)
                 win_draw = np.int(window*scale)
                 # cv2.rectangle(draw_img,(xbox_left, ytop_draw+ystart),(xbox_left+win_draw,ytop_draw+win_draw+ystart),(255,0,0),6) 
-                box = ((xbox_left, ytop_draw+ystart),(xbox_left+win_draw, ytop_draw+win_draw+ystart))
+                box = ((xbox_left+xstart, ytop_draw+ystart),(xbox_left+win_draw+xstart, ytop_draw+win_draw+ystart))
                 bbox_list.append(box)
             # if yb == 0 or yb == 1:
                 # xbox_left = np.int(xleft*scale)
