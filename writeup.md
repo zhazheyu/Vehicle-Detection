@@ -1,4 +1,4 @@
-##Writeup Template
+﻿##Writeup Template
 ###You can use this file as a template for your writeup if you want to submit it as a markdown file, but feel free to use some other method and submit a pdf if you prefer.
 
 ---
@@ -94,7 +94,6 @@ I tried various combinations of parameters and
 | YUV |  9  | 0 | None | 370.23s | 0.9512 | | 1764 |
 | YUV |  11 | 0 | None | 435.03 | 0.9547 | 2156 |
 | YUV |  13 | 0 | None | 542.9 | 0.9525 | 2548 |
-
 | YCrCb |  9  | ALL | (16, 16) | 72.4 | 0.9894 | 6060 |
 | YCrCb |  11 | ALL | (16, 16) | 74.16 | 0.9934 | 7236 | 
 | YCrCb |  13 | ALL | (16, 16) |  75.65 | 0.9953 | 8412 |
@@ -107,7 +106,6 @@ I tried various combinations of parameters and
 | YUV |  9  | 0 | (16, 16) | 172.67 | 0.9778 | 2532 |
 | YUV |  11 | 0 | (16, 16) | 206.42 | 0.9772 | 2924 |
 | YUV |  13 | 0 | (16, 16) | 320.44 | 0.9756 | 3316 |
-
 | YUV |  9  | ALL | (24, 24) | 71.74 | 0.9925 | 7020 |
 | YUV |  9  | 0 | (24, 24) | 229.24 | 0.9788 | | 3492 |
 | YUV |  11 | ALL | (24, 24) | 74.39s | 0.9938 | 8196 |
@@ -120,7 +118,6 @@ I tried various combinations of parameters and
 | YCrCb |  11 | 0 | (24, 24) | 201.75 | 0.9812 | 3884 |
 | YCrCb |  13 | ALL | (24, 24) | 75.56 | 0.995 | 9372 |
 | YCrCb |  13 | 0 | (24, 24) | 319.83 | 0.9822 | 4276 |
-
 | YUV |  9  | ALL | (32, 32) | 72.86 | 0.9903 | 8364 |
 | YUV |  9  | 0 | (32, 32) | 172.87 | 0.9778 | 4836 |
 | YUV |  11 | ALL | (32, 32) | 75.44s | 0.9928 | 9540 |
@@ -133,9 +130,6 @@ I tried various combinations of parameters and
 | YCrCb |  11 | 0 | (32, 32) | 208.36 | 0.9794 | 5228 |
 | YCrCb |  13 | ALL | (32, 32) | 77.27 | 0.9928 | 10716 |
 | YCrCb |  13 | 0 | (32, 32) | 331.2 | 0.9812 | 5620 |
-
-
-
 
 
 From the above parameters exploration, it is found that colorspace YUV, orientenation = 13, All channel for hog_feature extraction, and (32, 32) spatial size got highest accuracy -- test accuracy 0.9959.
